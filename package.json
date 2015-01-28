@@ -5,7 +5,7 @@
   "main": "gruntfile.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jasperjs/jasper.git"
+    "url": "https://github.com/angular/bower-angular"
   },
   "keywords": [
     "angularjs",
