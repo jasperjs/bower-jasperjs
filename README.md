@@ -17,7 +17,7 @@ npm install jasperjs
 ### bower
 
 ```shell
-bower install angular
+bower install jasperjs
 ```
 
 Then add a `<script>` to your `index.html`:
