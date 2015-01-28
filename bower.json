@@ -1,0 +1,17 @@
+{
+  "name": "jasperjs",
+  "version": "0.1.3",
+  "homepage": "https://github.com/jasperjs/jasper",
+  "authors": [
+    "Bukharin V <buhv@skbkontur.ru>"
+  ],
+  "main": "./jasper.js",
+  "description": "Client library for jasper application",
+  "keywords": [
+    "jasper",
+    "angularjs",
+    "typescript",
+    "spa"
+  ],
+  "license": "MIT"
+}
