@@ -439,6 +439,26 @@ var jasper;
 (function (jasper) {
     var core;
     (function (core) {
+        var ConstantProvider = (function () {
+            function ConstantProvider(provide) {
+                this.provide = provide;
+            }
+            ConstantProvider.prototype.register = function (name, value) {
+                this.provide.constant(name, value);
+            };
+            ConstantProvider.prototype.$get = function () {
+                return this;
+            };
+            ConstantProvider.$inject = ['$provide'];
+            return ConstantProvider;
+        })();
+        core.ConstantProvider = ConstantProvider;
+    })(core = jasper.core || (jasper.core = {}));
+})(jasper || (jasper = {}));
+var jasper;
+(function (jasper) {
+    var core;
+    (function (core) {
         var GlobalEventsService = (function () {
             function GlobalEventsService() {
                 this.events = {};
@@ -531,7 +551,7 @@ var jasper;
         core.JasperComponent = JasperComponent;
     })(core = jasper.core || (jasper.core = {}));
 })(jasper || (jasper = {}));
-angular.module('jasperCore', ['ng']).provider('jasperComponent', jasper.core.ComponentProvider).provider('jasperDecorator', jasper.core.DecoratorComponentProvider).provider('jasperService', jasper.core.ServiceProvider).provider('jasperFilter', jasper.core.FilterProvider).provider('jasperValue', jasper.core.ValueProvider).service('$globalEvents', jasper.core.GlobalEventsService);
+angular.module('jasperCore', ['ng']).provider('jasperComponent', jasper.core.ComponentProvider).provider('jasperDecorator', jasper.core.DecoratorComponentProvider).provider('jasperService', jasper.core.ServiceProvider).provider('jasperFilter', jasper.core.FilterProvider).provider('jasperValue', jasper.core.ValueProvider).provider('jasperConstant', jasper.core.ConstantProvider).service('$globalEvents', jasper.core.GlobalEventsService);
 var jasper;
 (function (jasper) {
     var areas;
@@ -979,6 +999,7 @@ var jasper;
 /// <reference path="core/services/ServiceProvider.ts" />
 /// <reference path="core/services/ServiceRegistrar.ts" />
 /// <reference path="core/values/ValueProvider.ts" />
+/// <reference path="core/constants/ConstantProvider.ts" />
 /// <reference path="core/GlobalEvents.ts" />
 /// <reference path="core/JasperComponent.ts" />
 /// <reference path="core/module.ts" />

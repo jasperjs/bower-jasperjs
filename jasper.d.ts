@@ -324,6 +324,18 @@ declare module jasper.core {
     }
 }
 declare module jasper.core {
+    interface IConstantProvider {
+        register(name: string, value: any): any;
+    }
+    class ConstantProvider implements IConstantProvider, ng.IServiceProvider {
+        private provide;
+        static $inject: string[];
+        constructor(provide: any);
+        register(name: string, value: any): void;
+        $get(): ConstantProvider;
+    }
+}
+declare module jasper.core {
     interface ISubscription {
         remove(): any;
     }
