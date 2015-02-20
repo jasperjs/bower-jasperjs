@@ -557,24 +557,22 @@ var jasper;
     var areas;
     (function (areas) {
         var JasperAreaDirective = (function () {
-            function JasperAreaDirective($compile, jasperAreasService, $q) {
+            function JasperAreaDirective($compile, jasperAreasService) {
                 var processingCssClasses = "ng-hide app-module-loading";
                 var directive = {
                     priority: 1000,
                     terminal: true,
                     restrict: 'A',
-                    compile: function (tElement, attrs) {
+                    compile: function (tElement) {
                         tElement.addClass(processingCssClasses);
                         tElement.removeAttr('data-jasper-module').removeAttr('jasper-area');
                         return {
-                            pre: function (scope, element, iAttrs, controller) {
-                                var moduleName = iAttrs["jasperArea"];
-                                var moduleNames = moduleName.split(',');
-                                var allModulesPromises = [];
-                                for (var i = 0; i < moduleNames.length; i++) {
-                                    allModulesPromises.push(jasperAreasService.loadAreas(moduleNames[i]));
+                            pre: function (scope, element, iAttrs) {
+                                var areaNames = iAttrs["jasperArea"];
+                                if (areaNames.indexOf(',') > 0) {
+                                    areaNames = areaNames.split(',');
                                 }
-                                $q.all(allModulesPromises).then(function () {
+                                jasperAreasService.loadAreas(areaNames).then(function () {
                                     var linkFn = element.data('$compileresult');
                                     if (!linkFn) {
                                         element.removeAttr('data-jasper-module').removeAttr('jasper-area');
@@ -586,7 +584,6 @@ var jasper;
                                         element.removeClass(processingCssClasses);
                                     }
                                     linkFn(scope);
-                                    //element.append(clone);
                                 });
                             }
                         };
@@ -594,7 +591,7 @@ var jasper;
                 };
                 return directive;
             }
-            JasperAreaDirective.$inject = ['$compile', 'jasperAreasService', '$q'];
+            JasperAreaDirective.$inject = ['$compile', 'jasperAreasService'];
             return JasperAreaDirective;
         })();
         areas.JasperAreaDirective = JasperAreaDirective;
@@ -603,7 +600,7 @@ var jasper;
 var jasper;
 (function (jasper) {
     var areas;
-    (function (areas) {
+    (function (_areas) {
         // Area, downloading now...
         var AreaDefers = (function () {
             function AreaDefers(name) {
@@ -707,7 +704,7 @@ var jasper;
         var JasperAreasService = (function () {
             function JasperAreasService($q) {
                 this.loadedAreas = [];
-                this.resourceManager = new areas.JasperResourcesManager();
+                this.resourceManager = new _areas.JasperResourcesManager();
                 this.q = $q;
                 this.loadiingAreas = new LoadingAreasIdleCollection(this.q);
             }
@@ -734,18 +731,25 @@ var jasper;
                 }
                 return this.loadiingAreas.addInitializer(areaName);
             };
-            JasperAreasService.prototype.loadAreas = function (areaName, hops) {
+            JasperAreasService.prototype.loadAreas = function (areas, hops) {
                 var _this = this;
                 if (hops === void 0) { hops = 0; }
                 if (!this.config)
                     throw "Areas not configured";
-                var section = this.config[areaName];
+                if (angular.isArray(areas)) {
+                    var allAreas = [];
+                    areas.forEach(function (areaName) {
+                        allAreas.push(_this.loadAreas(areaName));
+                    });
+                    return this.q.all(allAreas);
+                }
+                var section = this.config[areas];
                 if (!section)
-                    throw "Config with name '" + areaName + "' not found";
+                    throw "Config with name '" + areas + "' not found";
                 //dependencies:
                 hops++;
                 if (hops > JasperAreasService.maxDependencyHops)
-                    throw 'Possible cyclic dependencies found on module: ' + areaName;
+                    throw 'Possible cyclic dependencies found on module: ' + areas;
                 var allDependencies = []; // list of all deps of this module
                 for (var i = 0; i < section.dependencies.length; i++) {
                     var depSection = section.dependencies[i]; //current section depends on it
@@ -754,20 +758,20 @@ var jasper;
                 var defer = this.q.defer();
                 this.q.all(allDependencies).then(function () {
                     //all dependencies loaded
-                    if (_this.isAreaLoaded(areaName)) {
+                    if (_this.isAreaLoaded(areas)) {
                         defer.resolve();
                     }
-                    else if (_this.loadiingAreas.isLoading(areaName)) {
+                    else if (_this.loadiingAreas.isLoading(areas)) {
                         // If area is loading now, register a callback when area is loaded
-                        _this.loadiingAreas.onAreaLoaded(areaName).then(function () { return defer.resolve(); });
+                        _this.loadiingAreas.onAreaLoaded(areas).then(function () { return defer.resolve(); });
                     }
                     else {
                         // mark area as loading now
-                        _this.loadiingAreas.startLoading(areaName);
+                        _this.loadiingAreas.startLoading(areas);
                         _this.resourceManager.makeAccessible(_this.prepareUrls(section.scripts), _this.prepareUrls(section.styles), function () {
                             // notify all subscribers that area is loaded
-                            _this.loadiingAreas.notifyOnLoaded(areaName);
-                            _this.loadedAreas.push(areaName);
+                            _this.loadiingAreas.notifyOnLoaded(areas);
+                            _this.loadedAreas.push(areas);
                             defer.resolve();
                         });
                     }
@@ -805,7 +809,7 @@ var jasper;
             JasperAreasService.maxDependencyHops = 10;
             return JasperAreasService;
         })();
-        areas.JasperAreasService = JasperAreasService;
+        _areas.JasperAreasService = JasperAreasService;
     })(areas = jasper.areas || (jasper.areas = {}));
 })(jasper || (jasper = {}));
 var jasper;
