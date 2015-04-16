@@ -401,7 +401,7 @@ declare module jasper.areas {
         constructor($q: ng.IQService);
         configure(config: any): void;
         onAreaLoaded(areaName: string): ng.IPromise<any>;
-        initArea(areaName: string): ng.IPromise<any>;
+        initArea(areaName: string, cb: Function): any;
         loadAreas(areas: string, hops?: number): ng.IPromise<any>;
         loadAreas(areas: string[], hops?: number): ng.IPromise<any>;
         /**

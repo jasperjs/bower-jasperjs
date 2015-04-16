@@ -710,17 +710,16 @@ var jasper;
                     return this.loadAreas(areaName);
                 }
             };
-            JasperAreasService.prototype.initArea = function (areaName) {
+            JasperAreasService.prototype.initArea = function (areaName, cb) {
                 if (!this.config) {
                     // resolve unregistred areas (bootstrapped)
-                    return this.q.when(true);
+                    return cb();
                 }
                 var area = this.ensureArea(areaName);
                 if (!area.scripts || !area.scripts.length) {
-                    // no scripts specified for area (may be bootstraped - allready loaded with _base.min.js)
-                    return this.q.when(true);
+                    return cb();
                 }
-                return this.loadiingAreas.addInitializer(areaName);
+                return this.loadiingAreas.addInitializer(areaName).then(function () { return cb(); });
             };
             JasperAreasService.prototype.loadAreas = function (areas, hops) {
                 var _this = this;
