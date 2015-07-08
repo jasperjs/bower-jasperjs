@@ -633,9 +633,12 @@ var jasper;
                             case 'text':
                                 if (!attrs.hasOwnProperty(attrName))
                                     break;
-                                _this[ctrlProppertyName] = $interpolate(attrs[attrName])(directiveScope);
-                                var unbind = attrs.$observe(attrName, function (val, oldVal) {
-                                    changeCtrlProperty(_this, ctrlProppertyName, val, oldVal);
+                                var initValue = $interpolate(attrs[attrName])(directiveScope);
+                                _this[ctrlProppertyName] = initValue;
+                                var unbind = attrs.$observe(attrName, function (val) {
+                                    if (val !== initValue) {
+                                        changeCtrlProperty(_this, ctrlProppertyName, val);
+                                    }
                                 });
                                 onNewScopeDestroyed.push(unbind);
                                 break;
@@ -663,11 +666,15 @@ var jasper;
                             default:
                                 if (!attrs.hasOwnProperty(attrName))
                                     break;
-                                var attrValue = directiveScope.$eval(attrs[attrName]);
-                                _this[ctrlProppertyName] = attrValue;
-                                var unwatch = directiveScope.$watch(attrs[attrName], function (val, oldVal) {
-                                    changeCtrlProperty(_this, ctrlProppertyName, val, oldVal);
-                                });
+                                var initBindingValue = directiveScope.$eval(attrs[attrName]);
+                                _this[ctrlProppertyName] = initBindingValue;
+                                var unwatch = directiveScope.$watch($parse(attrs[attrName], function (val) {
+                                    // detect change after initial setup
+                                    if (val !== initBindingValue) {
+                                        changeCtrlProperty(_this, ctrlProppertyName, val);
+                                    }
+                                    return val;
+                                }), null);
                                 onNewScopeDestroyed.push(unwatch);
                                 break;
                         }
@@ -722,9 +729,10 @@ var jasper;
             }
             return result;
         }
-        function changeCtrlProperty(ctrl, propertyName, newValue, oldValue) {
-            if (newValue === oldValue && newValue === ctrl[propertyName])
+        function changeCtrlProperty(ctrl, propertyName, newValue) {
+            if (newValue === ctrl[propertyName])
                 return; // do not pass property id it does not change
+            var oldValue = ctrl[propertyName];
             ctrl[propertyName] = newValue;
             var methodName = propertyName + '_change';
             if (ctrl[methodName]) {
