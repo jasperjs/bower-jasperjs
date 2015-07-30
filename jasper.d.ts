@@ -1,4 +1,30 @@
 declare module jasper.core {
+    /**
+     * Interface allow to extend jasper application
+     * Uses by jDebug tools for live reloding application components
+     */
+    interface IDirectiveInterceptor {
+        /**
+         * Invokes when component is registering in the application
+         * @param definition
+         */
+        onRegister(definition: any): any;
+        /**
+         * Invokes when during directive template compilation
+         * @param directive     directive definition
+         * @param tElement      template element
+         */
+        onCompile(directive: ng.IDirective, tElement: JQuery): any;
+        /**
+         * Invokes when application create component instance over DOM element
+         * @param directive     directive definition
+         * @param scope         angular scope for directive
+         * @param iElement      directive DOM node
+         */
+        onMount(directive: ng.IDirective, scope: ng.IScope, iElement: JQuery): any;
+    }
+}
+declare module jasper.core {
     interface IComponentControllers {
         main: any;
         controllersToPass: any[];
@@ -59,10 +85,12 @@ declare module jasper.core {
     class HtmlComponentRegistrar implements IHtmlRegistrar<IHtmlComponentDefinition> {
         private directive;
         private utility;
+        private interceptor;
         constructor(compileProvider: ng.ICompileProvider);
         register(component: IHtmlComponentDefinition): void;
+        setInterceptor(interceptor: IDirectiveInterceptor): void;
+        createDirectiveFor(def: IHtmlComponentDefinition): ng.IDirective;
         private getScopeDefinition(def);
-        private createDirectiveFor(def);
         private getRequirementsForComponent(component);
     }
 }
@@ -75,7 +103,7 @@ declare module jasper.core {
         private componentRegistar;
         constructor($compileProvider: ng.ICompileProvider);
         register(component: IHtmlComponentDefinition): void;
-        $get(): {};
+        $get(): IHtmlRegistrar<IHtmlComponentDefinition>;
     }
 }
 declare module jasper {
@@ -230,15 +258,17 @@ declare module jasper.core {
         private decoratorRegistar;
         constructor($compileProvider: ng.ICompileProvider);
         register(decorator: IHtmlDecoratorDefinition): void;
-        $get(): {};
+        $get(): IHtmlRegistrar<IHtmlDecoratorDefinition>;
     }
 }
 declare module jasper.core {
     class HtmlDecoratorRegistrar implements IHtmlRegistrar<IHtmlDecoratorDefinition> {
         private directive;
         private utility;
+        private interceptor;
         constructor(compileProvider: ng.ICompileProvider);
         register(component: IHtmlDecoratorDefinition): void;
+        setInterceptor(interceptor: IDirectiveInterceptor): void;
         private createDirectiveFor(def);
         private getRequirementsForComponent(component);
         private getComponentControllers(controllers, directive);
@@ -369,14 +399,16 @@ declare module jasper.core {
         private serviceRegistar;
         constructor($provide: any);
         register(serviceDef: IServiceDefinition): void;
-        $get(): {};
+        $get(): IHtmlRegistrar<IServiceDefinition>;
     }
 }
 declare module jasper.core {
     class ServiceRegistrar implements IHtmlRegistrar<IServiceDefinition> {
+        private provide;
         private service;
         private utility;
         constructor(provide: any);
+        registerFactory(name: string, factory: Function): void;
         register(def: IServiceDefinition): void;
     }
 }
