@@ -665,6 +665,6 @@ declare module jasper {
 declare var jsp: jasper.IJasperStatic;
 declare module jasper {
 }
-declare module 'jasper' {
+declare module 'jasperjs' {
     export = jsp;
 }
