@@ -1,2 +1,2 @@
 require('./jasper');
-module.exports = jsp;
+module.exports = jasper;
