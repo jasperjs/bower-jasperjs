@@ -910,7 +910,8 @@ var jasper;
         })();
         // Object load areas
         var JasperAreasService = (function () {
-            function JasperAreasService($q) {
+            function JasperAreasService($q, rootScope) {
+                this.rootScope = rootScope;
                 this.loadedAreas = [];
                 this.resourceManager = new _areas.JasperResourcesManager();
                 this.q = $q;
@@ -976,8 +977,10 @@ var jasper;
                     }
                     else {
                         // mark area as loading now
+                        _this.rootScope.$broadcast("jasperAreaLoading", areas);
                         _this.loadiingAreas.startLoading(areas);
                         _this.resourceManager.makeAccessible(_this.prepareUrls(section.scripts), _this.prepareUrls(section.styles), function () {
+                            _this.rootScope.$broadcast("jasperAreaLoaded", areas);
                             // notify all subscribers that area is loaded
                             _this.loadiingAreas.notifyOnLoaded(areas);
                             _this.loadedAreas.push(areas);
@@ -1020,7 +1023,7 @@ var jasper;
                 }
                 return result;
             };
-            JasperAreasService.$inject = ['$q'];
+            JasperAreasService.$inject = ['$q', '$rootScope'];
             JasperAreasService.maxDependencyHops = 10;
             return JasperAreasService;
         })();

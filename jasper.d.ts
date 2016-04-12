@@ -528,6 +528,7 @@ declare module jasper.areas {
 }
 declare module jasper.areas {
     class JasperAreasService {
+        private rootScope;
         static $inject: string[];
         /**
          * Client-side areas configuration
@@ -538,7 +539,7 @@ declare module jasper.areas {
         resourceManager: IResourceManager;
         loadedAreas: string[];
         q: ng.IQService;
-        constructor($q: ng.IQService);
+        constructor($q: ng.IQService, rootScope: ng.IScope);
         configure(config: any): void;
         onAreaLoaded(areaName: string): ng.IPromise<any>;
         initArea(areaName: string, cb: () => any): any;
